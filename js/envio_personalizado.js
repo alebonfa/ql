@@ -204,7 +204,17 @@ var ds_destinatario = Ext.create('Ext.data.Store', {
 			]
 		}
 	}
+});
 
+var ds_remetente = Ext.create('Ext.data.Store', {
+	autoLoad: true,
+	fields: [
+		{name: 'nome', type: 'string'},
+		{name: 'cidade', type: 'string'},
+		{name: 'uf', type: 'string'},
+		{name: 'email', type: 'string'},
+		{name: 'telefone', type: 'string'}
+	]
 });
 
 Ext.require("Ext.form.field.ComboBox", function () {
@@ -382,10 +392,10 @@ pnlFiltroPalestrantes.hide();
 
 var pnlFiltroColaboradores = Ext.create('Ext.form.Panel', {
 	title: 'Filtros',
-	frame: false,
 	renderTo: 'qlsms_filtro02',
 	width: 1160,
 	layout: 'column',
+	frame: false,
 	border: false,
 	bodyPadding: 20,
 	collapsible: true,
@@ -396,7 +406,84 @@ var pnlFiltroColaboradores = Ext.create('Ext.form.Panel', {
 
 pnlFiltroColaboradores.hide();
 
+var grdRemetentes = Ext.create('Ext.grid.Panel', {
+	id: 'grdRemetentes',
+	store: ds_remetente,
+	columnWidth: 1,
+	columns: [
+		{ text: 'Nome', dataIndex: 'nome', width: 380},
+		{ text: 'Cidade', dataIndex: 'cidade', width: 300},
+		{ text: 'UF', dataIndex: 'uf', width: 50},
+		{ text: 'e-mail', dataIndex: 'email', width: 240},
+		{ text: 'Telefone', dataIndex: 'telefone', width: 100}
+	],
+	height: 400,
+	width: 1120
+});
 
+var pnlListaRemetentes = Ext.create('Ext.form.Panel', {
+	title: 'Remetentes Selecionados',
+	renderTo: 'qlsms_lista02',
+	width: 1160,
+	layout: 'column',
+	frame: false,
+	border: false,
+	bodyPadding: 20,
+	collapsible: true,
+	items: [
+		grdRemetentes
+	]
+});
+
+var grdDestinatarios = Ext.create('Ext.grid.Panel', {
+	store: ds_destinatario,
+	columnWidth: 1,
+	selType: 'checkboxmodel',
+	columns: [
+		{ text: 'Nome', dataIndex: 'nome', width: 380},
+		{ text: 'Cidade', dataIndex: 'cidade', width: 300},
+		{ text: 'UF', dataIndex: 'uf', width: 50},
+		{ text: 'e-mail', dataIndex: 'email', width: 240},
+		{ text: 'Telefone', dataIndex: 'telefone', width: 100}
+	],
+	height: 400,
+	width: 1120
+});
+
+var pnlListaDestinatarios = Ext.create('Ext.form.Panel', {
+	title: 'Destinatários',
+	renderTo: 'qlsms_lista01',
+	width: 1160,
+	layout: 'column',
+	frame: false,
+	border: false,
+	bodyPadding: 20,
+	collapsible: true,
+	items: [
+		grdDestinatarios
+	],
+	buttons: [{
+		text: 'Selecionar',
+		handler: function() {
+			var s = grdDestinatarios.getSelectionModel().getSelection();
+			console.log(s);
+			Ext.each(s, function(item) {
+				ds_remetente.add(0, {
+					nome: 'Alexandre',
+					cidade: 'Campinas',
+					uf: 'SP',
+					email: 'alexandre.bonfa@gmail.com',
+					telefone: '19 98203-6040'
+				})
+			})
+			grdRemetentes.store = ds_remetente;
+			ds_remetente.load({ params: {start: 0, limit: 20}});
+			Ext.getCmp('grdRemetentes').getView().refresh();
+			console.log(ds_remetente);
+			alert('Feito!');
+		}
+	}]
+});
 
 Ext.onReady(function() {
 
@@ -443,24 +530,6 @@ Ext.onReady(function() {
 				}
 			}
 		}
-	});
-
-//	pnlFiltroAlunos.enable();
-
-	Ext.create('Ext.grid.Panel', {
-		title: 'Destinatários',
-		store: ds_destinatario,
-		columns: [
-			{ xtype: 'checkcolumn', dataIndex: 'seleciona', width: 50},
-			{ text: 'Nome', dataIndex: 'nome', width: 400},
-			{ text: 'Cidade', dataIndex: 'cidade', width: 300},
-			{ text: 'UF', dataIndex: 'uf', width: 50},
-			{ text: 'e-mail', dataIndex: 'email', width: 240},
-			{ text: 'Telefone', dataIndex: 'telefone', width: 100}
-		],
-		height: 600,
-		width: 1160,
-		renderTo: 'qlsms_lista01'
 	});
 
 });
