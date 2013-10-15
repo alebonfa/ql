@@ -22,6 +22,7 @@ Ext.define('UFs', {
 
 	fields: [
 		{name: 'estado_id', type: 'int'},
+		{name: 'estado_sigla', type: 'string'},
 		{name: 'estado_nome', type: 'string'}
 	]
 
@@ -39,6 +40,7 @@ var ds_uf = Ext.create('Ext.data.Store', {
 			root: 'ufs',
 			fields: [
 				{name: 'estado_id', type: 'int', mapping: 'estado_id'},
+				{name: 'estado_sigla', type: 'string', mapping: 'estado_sigla'},
 				{name: 'estado_nome', type: 'string', mapping: 'estado_nome'}
 			]
 		}
@@ -52,6 +54,7 @@ Ext.define('Cidades', {
 	fields: [
 		{name: 'localidade_id', type: 'int'},
 		{name: 'estado_id', type: 'int'},
+		{name: 'estado_sigla', type: 'string'},
 		{name: 'localidade_nome', type: 'string'}
 	]
 
@@ -70,6 +73,7 @@ var ds_cidade = Ext.create('Ext.data.Store', {
 			fields: [
 				{name: 'localidade_id', type: 'string', mapping: 'localidade_id'},
 				{name: 'estado_id', type: 'int', mapping: 'estado_id'},
+				{nome: 'estado_sigla', type: 'string', mapping: 'estado_sigla'},
 				{name: 'localidade_nome', type: 'string', mapping: 'localidade_nome'}
 			]
 		}
@@ -184,6 +188,8 @@ Ext.define('Destinatarios', {
 
 });
 
+var param_destinatario = 1;
+
 var ds_destinatario = Ext.create('Ext.data.Store', {
 	storeID: 'DestinatariosStore',
 	model: 'Destinatarios',
@@ -191,11 +197,13 @@ var ds_destinatario = Ext.create('Ext.data.Store', {
 	proxy: {
 		type: 'ajax',
 		url: 'php/lista_destinatarios.php',
+		extraParams: {
+			tipo_destinatario: param_destinatario
+		},
 		reader: {
 			type: 'json', //json ou xml
 			root: 'destinatarios',
 			fields: [
-				{name: 'seleciona', type: 'bool'},
 				{name: 'nome', type: 'string', mapping: 'nome'},
 				{name: 'cidade', type: 'string', mapping: 'cidade'},
 				{name: 'uf', type: 'string', mapping: 'uf'},
@@ -206,8 +214,10 @@ var ds_destinatario = Ext.create('Ext.data.Store', {
 	}
 });
 
+console.log(ds_destinatario);
+
 var ds_remetente = Ext.create('Ext.data.Store', {
-	autoLoad: true,
+	autoLoad: false,
 	fields: [
 		{name: 'nome', type: 'string'},
 		{name: 'cidade', type: 'string'},
@@ -231,7 +241,7 @@ Ext.require("Ext.form.field.ComboBox", function () {
 var filt_nome = Ext.create('Ext.form.field.Text', {
 	fieldLabel: 'Nome',
 	columnWidth: .50,
-	style: 'margin-right:50px;',
+	style: 'margin-right:50px;'
 });
 
 var filt_di = Ext.create('Ext.form.field.Date', {
@@ -252,7 +262,7 @@ var filt_uf = Ext.create('Ext.form.field.ComboBox', {
 	style: 'margin-right:50px;',
 	store: ds_uf,
 	displayField: 'estado_nome',
-	valueField: 'estado_id',
+	valueField: 'estado_sigla',
 	emptyText: 'Escolha um Estado...',
 	minChars: 1,
 	queryMode: 'local',
@@ -263,7 +273,7 @@ var filt_uf = Ext.create('Ext.form.field.ComboBox', {
 		blur: function() {
 			ds_cidade.clearFilter();
 			if(this.getRawValue() !== '') {
-				ds_cidade.filter("estado_id", this.getValue());	
+				ds_cidade.filter("estado_sigla", this.getValue());	
 			}
 		}
 	}
@@ -299,7 +309,6 @@ var filt_cidade = Ext.create('Ext.form.field.ComboBox', {
 	enableKeyEvents: true,
 	listeners: {
 		keyup: function() {
-			// ds_cidade.clearFilter();
 			ds_cidade.removeFilter('filt_ln');
 			if (this.getRawValue() !== '') {
 				ds_cidade.addFilter({
@@ -335,7 +344,32 @@ var pnlFiltroAlunos = Ext.create('Ext.form.Panel', {
 	bodyPadding: 20,
 	collapsible: true,
 	buttons: [{
-		text: 'Filtrar'
+		text: 'Filtrar',
+		handler: function() {
+			ds_destinatario.reload();
+			ds_destinatario.clearFilter();
+			if (filt_uf.getRawValue() !== '') {
+				ds_destinatario.addFilter({
+					id: 'filt_uf',
+					property: 'uf',
+					value: filt_uf.getValue()
+				})
+			}
+			if (filt_nome.getRawValue() !== '') {
+				ds_destinatario.addFilter({
+					id: 'filt_nome',
+					property: 'nome',
+					value: filt_nome.getRawValue()
+				})
+			}
+			if (filt_cidade.getRawValue() !== '') {
+				ds_destinatario.addFilter({
+					id: 'filt_cidade',
+					property: 'cidade',
+					value: filt_cidade.getRawValue()
+				})
+			}
+		}
 	}]
 });
 
@@ -468,26 +502,16 @@ var pnlListaDestinatarios = Ext.create('Ext.form.Panel', {
 			var s = grdDestinatarios.getSelectionModel().getSelection();
 			console.log(s);
 			Ext.each(s, function(item) {
-				ds_remetente.add(0, {
-					nome: 'Alexandre',
-					cidade: 'Campinas',
-					uf: 'SP',
-					email: 'alexandre.bonfa@gmail.com',
-					telefone: '19 98203-6040'
-				})
-			})
-			grdRemetentes.store = ds_remetente;
-			ds_remetente.load({ params: {start: 0, limit: 20}});
-			Ext.getCmp('grdRemetentes').getView().refresh();
-			console.log(ds_remetente);
-			alert('Feito!');
+				ds_remetente.add(item)
+			});
+			grdDestinatarios.getSelectionModel().deselectAll();
 		}
 	}]
 });
 
 Ext.onReady(function() {
 
-	Ext.create('Ext.form.ComboBox', {
+	var filt_destinatario = Ext.create('Ext.form.ComboBox', {
 		fieldLabel: 'Destinatários',
 		store: tipoDestinatario,
 		queryMode: 'local',
@@ -499,6 +523,8 @@ Ext.onReady(function() {
 		renderTo: qlsms_filtro01,
 		listeners: {
 			change: function() {
+				param_destinatario = this.getValue();
+				ds_destinatario.reload();
 				if (this.getValue() === 1) {
 					pnlFiltroPalestrantes.hide();
 					pnlFiltroColaboradores.hide();
@@ -530,7 +556,9 @@ Ext.onReady(function() {
 				}
 			}
 		}
-	});
+
+});
+
 
 });
 
