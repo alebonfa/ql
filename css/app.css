@@ -68,7 +68,12 @@ body {
     margin-bottom: 20px;
 }
 
-#qlsms_lista01 {
+#qlsms_lista01, #qlsms_lista02 {
+    background-color: #444;
+    margin-bottom: 20px;
+}
+
+#qlsms_operacao {
     background-color: #444;
     margin-bottom: 20px;
 }
