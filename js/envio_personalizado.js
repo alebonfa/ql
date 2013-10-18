@@ -629,15 +629,21 @@ Ext.onReady(function() {
 		buttons: [{
 			text: 'Enviar',
 			handler: function() {
-				Ext.Ajax.request({
-					method: 'POST',
-					url: 'php/send_email.php',
-					success: function() {
-						alert('deu certo');
-					},
-					failure: function() {
-						alert('deu errado');
-					}
+				ds_remetente.each(function(rec) {
+					Ext.Ajax.request({
+						method: 'POST',
+						url: 'php/send_email.php',
+						params: {
+							'nome': rec.get('nome'),
+							'email': rec.get('email')
+						},
+						success: function() {
+							alert('deu certo');
+						},
+						failure: function() {
+							alert('deu errado');
+						}
+					})
 				})
 			}
 		}]

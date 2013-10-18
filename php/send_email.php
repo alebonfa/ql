@@ -1,9 +1,10 @@
 <?php
-	$emailTo = 'alexandre.bonfa@gmail.com';
-	$emailNome = 'Alexandre Bonfá';
 
+	$emailTo   = $_POST['email'];
+	$emailNome = $_POST['nome'];
 
-    include_once 'swift/swift_required.php';
+	include_once 'swift/swift_required.php';
+
 
 	// $body = format_email($info,'html');
 	// $body_plain_txt = format_email($info,'txt');
@@ -16,7 +17,7 @@
 	$message = Swift_Message::newInstance();
 	$message ->setSubject('Portal QualiLog');
 	$message ->setFrom(array('noreply@qualittas.com.br' => 'Portal QualiLog'));
-	$message ->setTo(array('alexandre.bonfa@gmail.com' => 'Alexandre Bonfá'));
+	$message ->setTo(array($emailTo => $emailNome));
 	
 	// $message ->setBody($body_plain_txt);
 	// $message ->addPart($body, 'text/html');
@@ -29,4 +30,5 @@
 	print_r($result);
 	
 	return $result;
+
 ?>
