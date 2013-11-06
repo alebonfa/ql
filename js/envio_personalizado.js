@@ -635,7 +635,8 @@ Ext.onReady(function() {
 						url: 'php/send_email.php',
 						params: {
 							'nome': rec.get('nome'),
-							'email': rec.get('email')
+							'email': rec.get('email'),
+							'vencimentos': '01/01/2013, 01/02/2013'
 						},
 						success: function() {
 							alert('deu certo');
